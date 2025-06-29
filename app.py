@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.helpers import load_formulas
 
 # Dark theme colors (default)
 DARK_THEME = {
@@ -170,20 +171,84 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# App UI
-st.title("LearnLoop - Study Companion for Class 10–12")
-st.write("Welcome! Select your class and subject to begin.")
+# App UI with navigation and page switching
 
-selected_class = st.selectbox("Select your class", ["10th", "11th", "12th"], key="class_select")
+if 'page' not in st.session_state:
+    st.session_state.page = 'selection'
 
-if selected_class == "10th":
-    subjects = ["Maths", "Science"]
-else:
-    subjects = ["Maths", "Physics", "Chemistry", "Biology"]
+if 'selected_class' not in st.session_state:
+    st.session_state.selected_class = None
 
-selected_subject = st.selectbox("Select your subject", subjects, key="subject_select")
+if 'selected_subject' not in st.session_state:
+    st.session_state.selected_subject = None
 
-st.success(f"Showing content for Class {selected_class} - {selected_subject}")
+if 'selected_topic' not in st.session_state:
+    st.session_state.selected_topic = None
+
+def show_selection_page():
+    st.title("LearnLoop - Study Companion for Class 10–12")
+    st.write("Welcome! Select your class and subject to begin.")
+
+    selected_class = st.selectbox("Select your class", ["10th", "11th", "12th"], key="class_select")
+
+    if selected_class == "10th":
+        subjects = ["Maths", "Science"]
+    else:
+        subjects = ["Maths", "Physics", "Chemistry", "Biology"]
+
+    selected_subject = st.selectbox("Select your subject", subjects, key="subject_select")
+
+    if st.button("Enter"):
+        st.session_state.selected_class = selected_class
+        st.session_state.selected_subject = selected_subject
+        st.session_state.page = 'formulas'
+        st.session_state.selected_topic = None
+
+def show_formulas_page():
+    st.title(f"Formulas for Class {st.session_state.selected_class} - {st.session_state.selected_subject}")
+
+    # Example topics per subject - this can be extended or loaded dynamically
+    topics_map = {
+        "Maths": ["Algebra", "Geometry", "Trigonometry"],
+        "Science": ["Physics Basics", "Chemistry Basics"],
+        "Physics": ["Mechanics", "Optics", "Thermodynamics"],
+        "Chemistry": ["Organic", "Inorganic", "Physical"],
+        "Biology": ["Botany", "Zoology"]
+    }
+
+    topics = topics_map.get(st.session_state.selected_subject, [])
+
+    # Sidebar for topics
+    selected_topic = st.sidebar.radio("Select Topic", topics, index=0 if topics else -1)
+
+    st.session_state.selected_topic = selected_topic
+
+    # Load formulas for selected class and subject
+    class_map = {
+        "10th": "10",
+        "11th": "11",
+        "12th": "12"
+    }
+    class_level = class_map.get(st.session_state.selected_class, "10")
+
+    formulas = load_formulas(class_level, st.session_state.selected_subject)
+
+    st.subheader(f"📘 Formulas for {selected_topic}")
+
+    # For demonstration, show all formulas (in real case, filter by topic)
+    for name, formula in formulas.items():
+        st.markdown(f"{name}: {formula}")
+
+    if st.button("Back"):
+        st.session_state.page = 'selection'
+        st.session_state.selected_class = None
+        st.session_state.selected_subject = None
+        st.session_state.selected_topic = None
+
+if st.session_state.page == 'selection':
+    show_selection_page()
+elif st.session_state.page == 'formulas':
+    show_formulas_page()
 
 # Chatbot icon and popup HTML with minimal JS for toggle
 st.markdown("""
