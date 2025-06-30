@@ -1,6 +1,0 @@
-streamlit
-openai
-numpy
-scipy
-pandas
-flask
