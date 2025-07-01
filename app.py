@@ -13,21 +13,28 @@ DARK_THEME = {
 
 theme = DARK_THEME
 
-# Inject CSS for full page and components styling
+# Inject CSS for full page and components styling and hide sidebar globally
 st.markdown(f"""
     <style>
+        /* Hide Streamlit sidebar globally */
+        [data-testid="stSidebar"] {{
+            display: none;
+        }}
+        /* Expand main content to full width */
+        [data-testid="stAppViewContainer"] {{
+            margin-left: 0px;
+            width: 100%;
+        }}
         /* Page background and text */
         body, .css-18e3th9 {{
             background-color: {theme['background']} !important;
             color: {theme['text']} !important;
         }}
-
         /* Input boxes and select boxes */
         .stTextInput>div>div>input, .stSelectbox>div>div>div>div {{
             background-color: {theme['box']} !important;
             color: {theme['text']} !important;
         }}
-
         /* Buttons */
         .stButton>button {{
             background-color: {theme['primary_accent']} !important;
@@ -38,7 +45,6 @@ st.markdown(f"""
             background-color: {theme['button_hover']} !important;
             color: {theme['text']} !important;
         }}
-
         /* Success message box */
         .stAlert-success {{
             background-color: {theme['box']} !important;
@@ -46,12 +52,10 @@ st.markdown(f"""
             border-radius: 5px;
             padding: 10px;
         }}
-
         /* Title and headers */
         h1, h2, h3, h4, h5, h6 {{
             color: {theme['primary_accent']} !important;
         }}
-
         /* Chatbot icon and text container */
         #chatbot-icon-container {{
             position: fixed;
@@ -84,14 +88,12 @@ st.markdown(f"""
             opacity: 1;
             pointer-events: auto;
         }}
-
         /* Pulse animation */
         @keyframes pulse {{
             0% {{ transform: scale(1); }}
             50% {{ transform: scale(1.1); }}
             100% {{ transform: scale(1); }}
         }}
-
         /* Chatbot popup container */
         #chatbot-popup {{
             position: fixed;
@@ -108,12 +110,10 @@ st.markdown(f"""
             display: none;
             flex-direction: column;
         }}
-
         /* Show popup */
         #chatbot-popup.show {{
             display: flex;
         }}
-
         /* Popup header */
         #chatbot-popup-header {{
             font-weight: bold;
@@ -123,7 +123,6 @@ st.markdown(f"""
             justify-content: space-between;
             align-items: center;
         }}
-
         /* Close button */
         #chatbot-popup-close {{
             cursor: pointer;
@@ -133,7 +132,6 @@ st.markdown(f"""
         #chatbot-popup-close:hover {{
             color: {theme['secondary_accent']};
         }}
-
         /* Chat messages */
         #chatbot-messages {{
             flex-grow: 1;
@@ -143,7 +141,6 @@ st.markdown(f"""
             border-radius: 5px;
             margin-bottom: 10px;
         }}
-
         /* Input area */
         #chatbot-input {{
             display: flex;
@@ -250,39 +247,49 @@ if st.session_state.page == 'selection':
 elif st.session_state.page == 'formulas':
     show_formulas_page()
 
-# Chatbot icon and popup HTML with minimal JS for toggle
+# Chatbot icon that opens chatbot page in new tab
 st.markdown("""
-<div id="chatbot-icon-container" title="mitra chatbot" role="button" tabindex="0" aria-label="Open mitra chatbot">
+<style>
+    #chatbot-icon-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        z-index: 1000;
+        user-select: none;
+        animation: pulse 2s infinite;
+        color: #00c2ff;
+    }
+    #chatbot-icon-container:hover {
+        color: #ff7f50;
+    }
+    #chatbot-icon {
+        font-size: 64px;
+        margin-right: 10px;
+    }
+    #chatbot-text {
+        font-size: 18px;
+        font-weight: bold;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+    #chatbot-icon-container:hover #chatbot-text {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+<a id="chatbot-icon-container" href="/chatbot_page" target="_blank" title="mitra chatbot" role="button" tabindex="0" aria-label="Open mitra chatbot" style="text-decoration:none; color: inherit;">
     <div id="chatbot-icon">🤖</div>
     <div id="chatbot-text">Hey!! here is your mitra</div>
-</div>
-
-<div id="chatbot-popup" role="dialog" aria-modal="true" aria-labelledby="chatbot-popup-header">
-    <div id="chatbot-popup-header">
-        mitra
-        <span id="chatbot-popup-close" role="button" tabindex="0" aria-label="Close chatbot popup">&times;</span>
-    </div>
-    <div id="chatbot-messages">
-        <p>Welcome to mitra! How can I help you?</p>
-    </div>
-    <div id="chatbot-input">
-        <input type="text" id="chatbot-text" placeholder="Type your message..." />
-        <button id="chatbot-send">Send</button>
-    </div>
-</div>
-
-<script>
-const icon = window.parent.document.getElementById('chatbot-icon');
-const popup = window.parent.document.getElementById('chatbot-popup');
-const closeBtn = window.parent.document.getElementById('chatbot-popup-close');
-
-if(icon && popup && closeBtn) {
-    icon.addEventListener('click', () => {
-        popup.classList.toggle('show');
-    });
-    closeBtn.addEventListener('click', () => {
-        popup.classList.remove('show');
-    });
-}
-</script>
+</a>
 """, unsafe_allow_html=True)
