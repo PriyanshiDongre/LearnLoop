@@ -24,9 +24,10 @@ class Mistral7BInstructModel:
         self.model.to(self.device)
         self.model.eval()
 
-    def generate(self, prompt, max_length=512, temperature=0.7):
+    def generate(self, prompt, max_length=1024, temperature=0.7):
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
         with torch.no_grad():
+            try:
             outputs = self.model.generate(
                 **inputs,
                 max_length=max_length,
@@ -34,6 +35,8 @@ class Mistral7BInstructModel:
                 do_sample=True,
                 pad_token_id=self.tokenizer.eos_token_id
             )
+            except Exception as e:
+            return f"Error: {str(e)}"
         return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
 class Chatbot:
